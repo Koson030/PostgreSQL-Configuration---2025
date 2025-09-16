@@ -667,10 +667,9 @@ FROM performance_results
 ORDER BY test_timestamp DESC;
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง
-2. อธิบายผลลัพธ์ที่ได้
-```
+<img width="545" height="73" alt="image" src="https://github.com/user-attachments/assets/6659c2e2-7050-4e76-94db-073f09df1eec" />
+
 
 
 ### Step 9: การ Monitoring และ Alerting
@@ -678,34 +677,34 @@ ORDER BY test_timestamp DESC;
 #### 9.1 สร้างระบบ Monitoring แบบ Real-time
 ```sql
 -- สร้าง view สำหรับติดตาม memory usage
-CREATE VIEW memory_monitor AS
-SELECT 
-    'shared_buffers' as component,
-    setting as current_setting,
-    pg_size_pretty(setting::bigint * 8192) as size_formatted,
-    ROUND((setting::bigint * 8192) / (1024.0*1024*1024) * 100 / 2, 2) as percent_of_2gb
-FROM pg_settings WHERE name = 'shared_buffers'
-UNION ALL
-SELECT 
-    'work_mem',
-    setting,
-    pg_size_pretty(setting::bigint * 1024),
-    ROUND((setting::bigint * 1024) / (1024.0*1024*1024) * 100 / 2, 2)
-FROM pg_settings WHERE name = 'work_mem'
-UNION ALL
-SELECT 
-    'maintenance_work_mem',
-    setting,
-    pg_size_pretty(setting::bigint * 1024),
-    ROUND((setting::bigint * 1024) / (1024.0*1024*1024) * 100 / 2, 2)
-FROM pg_settings WHERE name = 'maintenance_work_mem';
+  CREATE VIEW memory_monitor AS
+  SELECT 
+      'shared_buffers' as component,
+      setting as current_setting,
+      pg_size_pretty(setting::bigint * 8192) as size_formatted,
+      ROUND((setting::bigint * 8192) / (1024.0*1024*1024) * 100 / 2, 2) as percent_of_2gb
+  FROM pg_settings WHERE name = 'shared_buffers'
+  UNION ALL
+  SELECT 
+      'work_mem',
+      setting,
+      pg_size_pretty(setting::bigint * 1024),
+      ROUND((setting::bigint * 1024) / (1024.0*1024*1024) * 100 / 2, 2)
+  FROM pg_settings WHERE name = 'work_mem'
+  UNION ALL
+  SELECT 
+      'maintenance_work_mem',
+      setting,
+      pg_size_pretty(setting::bigint * 1024),
+      ROUND((setting::bigint * 1024) / (1024.0*1024*1024) * 100 / 2, 2)
+  FROM pg_settings WHERE name = 'maintenance_work_mem';
 
 -- ใช้งาน view
 SELECT * FROM memory_monitor;
 ```
 ### ผลการทดลอง
 ```
-รูปผลการทดลอง
+
 ```
 
 ### Step 10: การจำลอง Load Testing
@@ -753,9 +752,8 @@ CREATE INDEX idx_orders_product_id ON load_test_orders(product_id);
 CREATE INDEX idx_orders_date ON load_test_orders(order_date);
 ```
 ### ผลการทดลอง
-```
-รูปผลการทดลอง การสร้าง FUNCTION และ INDEX
-```
+<img width="745" height="411" alt="image" src="https://github.com/user-attachments/assets/6ff877d1-bf6b-4de9-b53b-09fb86c0cf6e" />
+
 
 #### 10.2 การทดสอบ Query Performance
 ```sql
@@ -930,9 +928,8 @@ SELECT * FROM simulate_oltp_workload(25);
 
 ```
 ### ผลการทดลอง
-```
-รูปผลการทดลอง
-```
+<img width="864" height="310" alt="image" src="https://github.com/user-attachments/assets/4d905f1a-5e5d-444a-b4ca-ec86f504c4d7" />
+
 -- ทดสอบปานกลาง  
 SELECT * FROM simulate_oltp_workload(100);
 ### ผลการทดลอง
