@@ -190,8 +190,11 @@ docker exec postgres-config df -h
 ### บันทึกผลการทดลอง
 ```
 1. อธิบายหน้าที่คำสั่ง docker exec postgres-config free, docker exec postgres-config df
+ตอบ docker exec postgres-config free สั่งให้รันคำสั่ง free (ดูการใช้ RAM/Swap) ภายใน container ชื่อ postgres-config, docker exec postgres-config df สั่งให้รันคำสั่ง df (ดูการใช้พื้นที่ดิสก์) ภายใน container ชื่อ postgres-config
 2. option -h ในคำสั่งมีผลอย่างไร
+ตอบ แสดงผลเป็นหน่วยที่อ่านง่าย เช่น KB, MB, GB แทนที่จะเป็นตัวเลข byte ยาว ๆ
 3. docker exec postgres-config nproc  แสดงค่าผลลัพธ์อย่างไร
+ตอบ จะคืนค่าเป็นตัวเลข เช่น 2 หรือ 4 ขึ้นกับว่า container นั้นถูกจัดสรรกี่ core
 ```
 #### 1.2 เชื่อมต่อและตรวจสอบสถานะปัจจุบัน
 ```bash
@@ -210,7 +213,9 @@ SHOW data_directory;
 ### บันทึกผลการทดลอง
 ```
 1. ตำแหน่งที่อยู่ของไฟล์ configuration อยู่ที่ตำแหน่งใด
-2. ตำแหน่งที่อยู่ของไฟล์ data อยู่ที่ตำแหน่งใด
+ตอบ อยู่ตำแหน่ง Data Directory 
+2.ตำแหน่งที่อยู่ของไฟล์ data อยู่ที่ตำแหน่งใด
+ตอบ อยู๋ใน /var/lib/postgresql/data
 ```
 -- ตรวจสอบการตั้งค่าปัจจุบัน
 SELECT name, setting, unit, category, short_desc 
@@ -221,9 +226,8 @@ WHERE name IN (
 );
 ```
 ### บันทึกผลการทดลอง
-```
-บันทึกรูปผลของ configuration ทั้ง 6 ค่า 
-```
+<img width="1261" height="477" alt="image" src="https://github.com/user-attachments/assets/33fd306b-96e4-47a4-ba3e-b70085dd53b7" />
+
 
 ### Step 2: การปรับแต่งพารามิเตอร์แบบค่อยเป็นค่อยไป
 
@@ -255,11 +259,10 @@ WHERE name = 'shared_buffers';
 docker exec -it -u postgres postgres-config pg_ctl restart -D /var/lib/postgresql/data -m fast
 
 ### ผลการทดลอง
-```
 รูปผลการเปลี่ยนแปลงค่า pending_restart
-รูปหลังจาก restart postgres
 
-```
+รูปหลังจาก restart postgres
+<img width="1058" height="54" alt="image" src="https://github.com/user-attachments/assets/cf7ee2da-2d4a-4460-ba4d-a40ea8666bd8" />
 
 #### 2.2 ปรับแต่ง Work Memory (ไม่ต้อง restart)
 ```sql
@@ -280,9 +283,7 @@ FROM pg_settings
 WHERE name = 'work_mem';
 ```
 ### ผลการทดลอง
-```
-รูปผลการเปลี่ยนแปลงค่า work_mem
-```
+<img width="475" height="331" alt="image" src="https://github.com/user-attachments/assets/90d8f0f6-43b1-4efd-8ea5-ab88fe46222c" />
 
 #### 3.3 ปรับแต่ง Maintenance Work Memory
 ```sql
@@ -297,9 +298,7 @@ SELECT pg_reload_conf();
 SHOW maintenance_work_mem;
 ```
 ### ผลการทดลอง
-```
-รูปผลการเปลี่ยนแปลงค่า maintenance_work_mem
-```
+<img width="383" height="150" alt="image" src="https://github.com/user-attachments/assets/86eae371-3ecc-4818-89b1-83ffe6f0caa2" />
 
 #### 3.4 ปรับแต่ง WAL Buffers
 ```sql
@@ -322,9 +321,7 @@ docker exec -it postgres-config psql -U postgres
 SHOW wal_buffers;
 ```
 ### ผลการทดลอง
-```
-รูปผลการเปลี่ยนแปลงค่า wal_buffers
-```
+<img width="273" height="167" alt="image" src="https://github.com/user-attachments/assets/5ac9e5b3-65f8-486f-89de-f4f797a72eae" />
 
 #### 3.5 ปรับแต่ง Effective Cache Size
 ```sql
@@ -339,9 +336,8 @@ SELECT pg_reload_conf();
 SHOW effective_cache_size;
 ```
 ### ผลการทดลอง
-```
-รูปผลการเปลี่ยนแปลงค่า effective_cache_size
-```
+<img width="372" height="142" alt="image" src="https://github.com/user-attachments/assets/e9db230c-fd2c-4dff-8580-c5ea9f8c3e02" />
+
 
 ### Step 4: ตรวจสอบผล
 
@@ -368,9 +364,8 @@ WHERE name IN (
 ORDER BY name;
 ```
 ### ผลการทดลอง
-```
-รูปผลการลัพธ์การตั้งค่า
-```
+<img width="1268" height="498" alt="image" src="https://github.com/user-attachments/assets/070f0503-fda9-458b-bc0a-bdddf2591fb6" />
+
 
 ### Step 5: การสร้างและทดสอบ Workload
 
@@ -412,11 +407,14 @@ ORDER BY data
 LIMIT 1000;
 ```
 ### ผลการทดลอง
-```
-1. คำสั่ง EXPLAIN(ANALYZE,BUFFERS) คืออะไร 
+1. คำสั่ง EXPLAIN(ANALYZE,BUFFERS) คืออะไร
+ตอบ วิเคราะห์ประสิทธิภาพการทำงานจริง ของคำสั่ง SQL
 2. รูปผลการรัน
+<img width="1247" height="431" alt="image" src="https://github.com/user-attachments/assets/d11fd503-506c-4af7-88d1-3c3e9fab1513" />
 3. อธิบายผลลัพธ์ที่ได้
-```
+ตอบ แผนการดำเนินการของคำสั่ง SQL และ สถิติประสิทธิภาพที่เกิดขึ้นจริง โดยละเอียด ว่าฐานข้อมูลประมวลผลคำสั่งอย่างไร ใช้เวลาเท่าไร และใช้ทรัพยากรของระบบอย่างไร เช่น หน่วยความจำบัฟเฟอร์
+
+
 ```sql
 -- ทดสอบ Hash operation
 EXPLAIN (ANALYZE, BUFFERS)
@@ -428,11 +426,13 @@ LIMIT 100;
 ```
 
 ### ผลการทดลอง
-```
 1. รูปผลการรัน
-2. อธิบายผลลัพธ์ที่ได้ 
+<img width="1065" height="324" alt="image" src="https://github.com/user-attachments/assets/b4ec633a-b1e4-481a-8065-a2edc0922a7d" />
+2. อธิบายผลลัพธ์ที่ได้
+ตอบ Query นี้ทำงานได้เร็วมาก ใช้เวลาแค่ 1.395 มิลลิวินาที และได้ผลลัพธ์มา 10 แถว
 3. การสแกนเป็นแบบใด เกิดจากเหตุผลใด
-```
+ตอบ "Seq Scan" หรือ Sequential Scan (การสแกนแบบลำดับ) ไม่ได้เอื้อให้ใช้ Index หรือเพราะตารางมีขนาดเล็กมากจน Seq Scan คุ้มค่าที่สุด
+
 #### 5.3 การทดสอบ Maintenance Work Memory
 ```sql
 -- ทดสอบ CREATE INDEX (จะใช้ maintenance_work_mem)
@@ -447,10 +447,11 @@ DELETE FROM large_table WHERE id % 10 = 0;
 VACUUM (ANALYZE, VERBOSE) large_table;
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง จากคำสั่ง VACUUM (ANALYZE, VERBOSE) large_table;
+<img width="1129" height="379" alt="image" src="https://github.com/user-attachments/assets/9827bd7c-0f77-4890-8fe2-dc66b0876e19" />
 2. อธิบายผลลัพธ์ที่ได้
-```
+ตอบ คำสั่ง VACUUM (ANALYZE, VERBOSE) ทำงานได้สำเร็จ แต่ตาราง large_table ไม่มีข้อมูลที่ตายแล้ว (dead rows) ที่ต้องทำความสะอาดเลย และอาจจะเป็นตารางที่ว่างเปล่าหรือมีขนาดเล็กมากจนไม่ต้องใช้เวลาในการดำเนินการใดๆ เลย
+
 ### Step 6: การติดตาม Memory Usage
 
 #### 6.1 สร้างฟังก์ชันติดตาม Memory
@@ -491,9 +492,8 @@ SELECT
 FROM get_memory_usage();
 ```
 ### ผลการทดลอง
-```
-รูปผลการทดลอง
-```
+<img width="711" height="201" alt="image" src="https://github.com/user-attachments/assets/cb1ff307-cf78-4316-854c-002916087064" />
+
 
 #### 6.2 การติดตาม Buffer Hit Ratio
 ```sql
@@ -512,10 +512,11 @@ WHERE heap_blks_read + heap_blks_hit > 0
 ORDER BY heap_blks_read + heap_blks_hit DESC;
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง
-2. อธิบายผลลัพธ์ที่ได้
-```
+<img width="730" height="104" alt="image" src="https://github.com/user-attachments/assets/7d6af2e8-3652-4841-976f-8c3c330a315f" />
+3. อธิบายผลลัพธ์ที่ได้
+ตอบ ไม่มีการเรียกใช้งานตารางในฐานข้อมูลยังไม่มีการเรียกใช้งานใดๆ ตั้งแต่ฐานข้อมูลเริ่มทำงานหรือตั้งแต่มีการรีเซ็ตสถิติ ทำให้ไม่มีค่าสถิติใดๆ ที่จะแสดงผล
+   
 #### 6.3 ดู Buffer Hit Ratio ทั้งระบบ
 ```sql
 SELECT datname,
@@ -526,10 +527,10 @@ FROM pg_stat_database
 WHERE datname = current_database();
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง
+<img width="528" height="115" alt="image" src="https://github.com/user-attachments/assets/b9764713-8c6c-48b1-8a0a-ce4117212fa6" />
 2. อธิบายผลลัพธ์ที่ได้
-```
+ตอบ ฐานข้อมูลเรามันโคตรฉลาด มันไม่ต้องไปยุ่งกับฮาร์ดดิสก์เลย เพราะข้อมูลที่ต้องการใช้เกือบทั้งหมดถูกเก็บอยู่ใน RAM หมดแล้วทำให้การทำงานของมันเร็ว
 
 #### 6.4 ดู Table ที่มี Disk I/O มาก
 ```sql
@@ -547,10 +548,11 @@ ORDER BY heap_blks_read DESC
 LIMIT 10;
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง
+<img width="951" height="79" alt="image" src="https://github.com/user-attachments/assets/048e2621-ac69-49fd-a8eb-03fe75db38da" />
 2. อธิบายผลลัพธ์ที่ได้
-```
+ตอบ ไม่มีข้อมูลสถิติเกี่ยวกับการใช้งานตาราง (table access statistics) ในฐานข้อมูลที่คุณกำลังเชื่อมต่ออยู่ 
+
 ### Step 7: การปรับแต่ง Autovacuum
 
 #### 7.1 ทำความเข้าใจ Autovacuum Parameters
@@ -562,10 +564,10 @@ WHERE name LIKE '%autovacuum%'
 ORDER BY name;
 ```
 ### ผลการทดลอง
-```
 1. รูปผลการทดลอง
+<img width="1309" height="478" alt="image" src="https://github.com/user-attachments/assets/4b68d9a8-a5bb-4885-873d-4f94ce64dc80" />
 2. อธิบายค่าต่าง ๆ ที่มีความสำคัญ
-```
+ตอบ autovacuum_freeze_max_age คือจำนวน Transaction ID สูงสุดที่ยังไม่ถูก "แช่แข็ง" (frozen) หากจำนวน Transaction ID ที่ยังไม่ถูกแช่แข็งในตารางใดเกินค่านี้ จะบังคับให้ Autovacuum ทำงานทันทีเพื่อป้องกัน Transaction ID Wraparound ซึ่งอาจทำให้ฐานข้อมูลไม่สามารถเขียนข้อมูลได้อีกต่อไป, autovacuum_vacuum_cost_delay เป็นการ หน่วงเวลา ระหว่างการทำงานของ Autovacuum เพื่อไม่ให้ใช้ทรัพยากร (I/O) มากเกินไป ซึ่งอาจส่งผลกระทบต่อการทำงานของ Query อื่นๆ ค่าที่สูงขึ้นจะทำให้ Autovacuum ทำงานช้าลงแต่จะรบกวนระบบน้อยลง
 
 #### 7.2 การปรับแต่ง Autovacuum สำหรับประสิทธิภาพ
 ```sql
@@ -592,9 +594,7 @@ ALTER SYSTEM SET autovacuum_work_mem = '512MB';
 SELECT pg_reload_conf();
 ```
 ### ผลการทดลอง
-```
-รูปผลการทดลองการปรับแต่ง Autovacuum (Capture รวมทั้งหมด 1 รูป)
-```
+<img width="644" height="374" alt="image" src="https://github.com/user-attachments/assets/79fa3a24-d0be-4ceb-8116-b7cdafab5ae8" />
 
 ### Step 8: Performance Testing และ Benchmarking
 
